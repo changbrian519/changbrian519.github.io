@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的个人主页</title>
+<style>
+  /* ============================================================
+     配色变量 —— 想换主题色改这里即可
+     ============================================================ */
+  :root {
+    --bg: #0a0e17;
+    --bg-soft: #0f1524;
+    --bg-softer: #141b2e;
+    --border: #1e2a44;
+    --text: #e6edf7;
+    --text-dim: #93a1b8;
+    --accent: #22d3ee;
+    --accent-2: #a78bfa;
+    --gradient: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
+    --glow: 0 0 24px rgba(34, 211, 238, 0.35);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(800px 500px at 15% -5%, rgba(34, 211, 238, 0.12), transparent 60%),
+      radial-gradient(700px 500px at 90% 10%, rgba(167, 139, 250, 0.12), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ============================================================
+     导航栏
+     ============================================================ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    background: rgba(10, 14, 23, 0.7);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1080px; margin: 0 auto; padding: 0 24px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: Consolas, "JetBrains Mono", monospace;
+    font-weight: 700; font-size: 18px; letter-spacing: 1px;
+    background: var(--gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .nav-links { display: flex; gap: 26px; list-style: none; }
+  .nav-links a { font-size: 14px; color: var(--text-dim); transition: color .2s; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-toggle {
+    display: none; background: none; border: none; color: var(--text);
+    font-size: 24px; cursor: pointer;
+  }
+
+  /* ============================================================
+     通用 section
+     ============================================================ */
+  section { padding: 96px 0; }
+  .section-title { font-size: 30px; font-weight: 700; margin-bottom: 12px; }
+  .section-title .bar {
+    display: inline-block; width: 4px; height: 26px;
+    background: var(--gradient); border-radius: 2px; margin-right: 12px;
+    vertical-align: -4px; box-shadow: var(--glow);
+  }
+  .section-sub { color: var(--text-dim); margin-bottom: 48px; font-size: 15px; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ============================================================
+     Hero 首屏
+     ============================================================ */
+  #hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 0 60px; }
+  .hero-inner { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .hero-tag { font-family: Consolas, monospace; font-size: 14px; color: var(--accent); letter-spacing: 2px; margin-bottom: 16px; }
+  .hero-name { font-size: clamp(38px, 7vw, 64px); font-weight: 800; line-height: 1.15; margin-bottom: 12px; }
+  .hero-name .glow {
+    background: var(--gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero-role { font-size: clamp(18px, 3vw, 24px); color: var(--text-dim); margin-bottom: 24px; font-weight: 400; }
+  .hero-role .type-cursor { color: var(--accent); font-weight: 700; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hero-desc { max-width: 560px; color: var(--text-dim); margin-bottom: 36px; }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; transition: transform .2s, box-shadow .2s; cursor: pointer; }
+  .btn-primary { background: var(--gradient); color: #07121a; box-shadow: var(--glow); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 32px rgba(34,211,238,.5); }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  /* 编辑模式下出现的头衔输入框 */
+  .role-input {
+    display: none; font-size: inherit; color: var(--text);
+    background: var(--bg-softer); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 14px; font-family: inherit; width: min(360px, 80%);
+  }
+  .role-input:focus { outline: none; border-color: var(--accent); }
+
+  /* ============================================================
+     关于我
+     ============================================================ */
+  .about-grid { display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: start; }
+  .avatar { width: 160px; height: 160px; border-radius: 50%; background: var(--gradient); padding: 3px; margin: 0 auto; }
+  .avatar .inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--bg-soft); overflow: hidden;
+    display: flex; align-items: center; justify-content: center; font-size: 56px;
+  }
+  .avatar .inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .about-text h3 { font-size: 20px; margin-bottom: 14px; }
+  .about-text p { color: var(--text-dim); margin-bottom: 18px; }
+  .info-list { list-style: none; display: grid; gap: 10px; }
+  .info-list li { display: flex; gap: 12px; align-items: baseline; }
+  .info-list .k { color: var(--accent); font-family: Consolas, monospace; min-width: 64px; }
+  .info-list .v { color: var(--text); }
+
+  /* ============================================================
+     兴趣爱好
+     ============================================================ */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 14px; padding: 26px;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .card:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--glow); }
+  .card .icon { font-size: 38px; margin-bottom: 14px; }
+  .card h4 { font-size: 17px; margin-bottom: 8px; }
+  .card p { color: var(--text-dim); font-size: 14px; }
+
+  /* ============================================================
+     技能特长
+     ============================================================ */
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .skill-group h4 { font-size: 16px; margin-bottom: 20px; }
+  .skill { margin-bottom: 18px; }
+  .skill .top { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+  .skill .top .pct { color: var(--text-dim); font-family: Consolas, monospace; }
+  .bar-track { height: 8px; background: var(--bg-softer); border-radius: 4px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; width: 0; border-radius: 4px;
+    background: var(--gradient); box-shadow: var(--glow);
+    transition: width .9s cubic-bezier(.2,.6,.2,1);
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .tag {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px;
+    background: var(--bg-softer); border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ============================================================
+     经历时间线
+     ============================================================ */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ""; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 36px; }
+  .tl-item::before {
+    content: ""; position: absolute; left: -28px; top: 6px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--bg); border: 3px solid var(--accent); box-shadow: var(--glow);
+  }
+  .tl-time { font-family: Consolas, monospace; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+  .tl-item h4 { font-size: 17px; margin-bottom: 4px; }
+  .tl-item .where { color: var(--text-dim); font-size: 14px; margin-bottom: 6px; }
+  .tl-item p { color: var(--text-dim); font-size: 14px; }
+
+  /* ============================================================
+     作品集
+     ============================================================ */
+  .work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .work {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .work:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: var(--glow); }
+  .work-cover {
+    height: 160px; background: linear-gradient(135deg, #123a52, #2a1e4a);
+    display: flex; align-items: center; justify-content: center; font-size: 44px;
+  }
+  .work-body { padding: 20px; }
+  .work-body h4 { font-size: 16px; margin-bottom: 6px; }
+  .work-body p { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; }
+  .work-tag { display: inline-block; font-size: 12px; color: var(--accent); font-family: Consolas, monospace; }
+
+  /* ============================================================
+     联系方式
+     ============================================================ */
+  .contact-wrap { text-align: center; }
+  .contact-mail {
+    font-family: Consolas, monospace; font-size: 22px;
+    background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent;
+    display: inline-block; margin-bottom: 28px;
+  }
+  .socials { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .social {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px;
+    border: 1px solid var(--border); color: var(--text-dim); transition: all .2s;
+  }
+  .social:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .social svg { width: 18px; height: 18px; fill: currentColor; }
+
+  footer { text-align: center; padding: 36px 24px; color: var(--text-dim); font-size: 13px; border-top: 1px solid var(--border); }
+  footer .mono { font-family: Consolas, monospace; color: var(--accent); }
+
+  /* ============================================================
+     座右铭
+     ============================================================ */
+  .quote { max-width: 760px; margin: 0 auto; text-align: center; }
+  .quote-mark { font-size: 64px; line-height: 1; color: var(--accent); font-family: Georgia, serif; }
+  .quote-text { font-size: 22px; line-height: 1.6; color: var(--text); margin: 8px 0 16px; font-weight: 500; }
+  .quote-author { color: var(--text-dim); font-family: Consolas, monospace; }
+
+  /* ============================================================
+     数据统计
+     ============================================================ */
+  .stats-section { padding: 24px 0 48px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .stat { text-align: center; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; padding: 26px 12px; transition: border-color .25s, box-shadow .25s; }
+  .stat:hover { border-color: var(--accent); box-shadow: var(--glow); }
+  .stat-num { font-size: 40px; font-weight: 800; font-family: Consolas, monospace; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat-label { color: var(--text-dim); font-size: 14px; margin-top: 4px; }
+  @media (max-width: 768px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ============================================================
+     作品集：标签 + 详情链接
+     ============================================================ */
+  .work-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .work-link-btn {
+    display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--accent); color: var(--accent); transition: all .2s;
+  }
+  .work-link-btn:hover { background: var(--accent); color: #07121a; }
+  .work-link-url { display: none; }
+  body.editing .work-link-url { display: inline-block; margin-left: 10px; font-family: Consolas, monospace; font-size: 12px; color: var(--accent); }
+
+  /* ============================================================
+     编辑模式：按钮 + 工具栏 + 可编辑高亮
+     ============================================================ */
+  .edit-btn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--gradient); border: none; cursor: pointer;
+    font-size: 22px; box-shadow: var(--glow); color: #07121a;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .2s;
+  }
+  .edit-btn:hover { transform: scale(1.1); }
+
+  .edit-bar {
+    position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: none; gap: 8px; flex-wrap: wrap; justify-content: center;
+    max-width: calc(100vw - 32px);
+    background: rgba(15,21,36,.94); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; backdrop-filter: blur(12px);
+  }
+  body.editing .edit-bar { display: flex; }
+  .edit-bar button {
+    background: var(--bg-softer); color: var(--text); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  .edit-bar button:hover { border-color: var(--accent); color: var(--accent); }
+  .edit-bar button.warn:hover { border-color: #f87171; color: #f87171; }
+  .edit-bar .edit-hint { font-size: 12px; color: var(--text-dim); align-self: center; }
+
+  /* 格式工具栏 */
+  .format-bar {
+    position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+    z-index: 200; display: none; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center;
+    max-width: calc(100vw - 24px);
+    background: rgba(15,21,36,.96); border: 1px solid var(--border); border-radius: 12px;
+    padding: 8px 12px; backdrop-filter: blur(12px);
+  }
+  body.editing .format-bar { display: flex; }
+  .format-bar button {
+    background: var(--bg-softer); color: var(--text); border: 1px solid var(--border);
+    min-width: 34px; height: 32px; border-radius: 6px; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; padding: 0 10px;
+  }
+  .format-bar button:hover { border-color: var(--accent); color: var(--accent); }
+  .format-bar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .format-bar select {
+    background: var(--bg-softer); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; height: 32px; font-size: 13px; padding: 0 6px; cursor: pointer;
+  }
+  .format-bar .color-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-dim); }
+  .format-bar input[type="color"] {
+    width: 32px; height: 28px; border: 1px solid var(--border); border-radius: 6px;
+    background: transparent; padding: 0; cursor: pointer;
+  }
+
+  body.editing [data-key] { cursor: text; outline: 1px dashed transparent; transition: outline-color .2s, background .2s; }
+  body.editing [data-key]:hover { outline-color: var(--accent); background: rgba(34,211,238,.06); }
+  body.editing [data-key]:focus { outline: 1px solid var(--accent); background: rgba(34,211,238,.08); }
+
+  /* ============================================================
+     响应式
+     ============================================================ */
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none; position: absolute; top: 60px; left: 0; right: 0;
+      flex-direction: column; gap: 0;
+      background: rgba(10,14,23,.96); border-bottom: 1px solid var(--border);
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { display: block; padding: 14px 24px; border-top: 1px solid var(--border); }
+    .nav-toggle { display: block; }
+    .about-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr; }
+    section { padding: 72px 0; }
+    .edit-bar { bottom: 84px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 导航 ================= -->
+<nav>
+  <div class="nav-inner">
+    <span class="logo">&lt;我的主页 /&gt;</span>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">关于我</a></li>
+      <li><a href="#interests">兴趣</a></li>
+      <li><a href="#skills">技能</a></li>
+      <li><a href="#timeline">经历</a></li>
+      <li><a href="#portfolio">作品</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单">☰</button>
+  </div>
+</nav>
+
+<!-- ================= Hero ================= -->
+<header id="hero">
+  <div class="hero-inner">
+    <p class="hero-tag">// 你好，我是</p>
+    <h1 class="hero-name"><span class="glow" data-key="name">你的名字</span></h1>
+    <p class="hero-role">
+      <span id="roleWrap"><span id="typeText"></span><span class="type-cursor">|</span></span>
+      <input id="roleInput" class="role-input" placeholder="多个头衔用、分隔，如：工程师、设计师" />
+    </p>
+    <p class="hero-desc" data-key="tagline">
+      这里写一句自我介绍或 tagline，一句话说清楚你是谁、在做什么。
+    </p>
+    <div class="hero-btns">
+      <a class="btn btn-primary" href="#portfolio">查看作品</a>
+      <a class="btn btn-ghost" href="#contact">联系我</a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 关于我 ================= -->
+<section id="about">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>关于我</h2>
+    <p class="section-sub reveal">About Me</p>
+    <div class="about-grid">
+      <div class="avatar reveal">
+        <div class="inner"><img src="avatar.jpg" alt="我的头像" /></div>
+      </div>
+      <div class="about-text reveal">
+        <h3>个人简介</h3>
+        <p data-key="about">
+          这里是你的自我介绍，写 2~4 句话：你是谁、来自哪里、做什么工作/学习什么、性格和追求等。
+        </p>
+        <ul class="info-list">
+          <li><span class="k">姓名</span><span class="v" data-key="name">你的名字</span></li>
+          <li><span class="k">所在地</span><span class="v" data-key="location">你的城市</span></li>
+          <li><span class="k">职业</span><span class="v" data-key="job">你的职业 / 身份</span></li>
+          <li><span class="k">教育</span><span class="v" data-key="education">你的学校 / 专业</span></li>
+          <li><span class="k">邮箱</span><span class="v" data-key="email">you@example.com</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 座右铭 ================= -->
+<section id="quote">
+  <div class="container">
+    <div class="quote reveal">
+      <div class="quote-mark">“</div>
+      <p class="quote-text" data-key="quote_text">这里写一句你的座右铭或人生信条，一句话展现你的态度。</p>
+      <div class="quote-author" data-key="quote_author">—— 你的名字</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 数据统计 ================= -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats">
+      <div class="stat reveal">
+        <div class="stat-num" data-key="stat1_num">3+</div>
+        <div class="stat-label" data-key="stat1_label">年经验</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num" data-key="stat2_num">20+</div>
+        <div class="stat-label" data-key="stat2_label">完成项目</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num" data-key="stat3_num">8</div>
+        <div class="stat-label" data-key="stat3_label">掌握技能</div>
+      </div>
+      <div class="stat reveal">
+        <div class="stat-num" data-key="stat4_num">5</div>
+        <div class="stat-label" data-key="stat4_label">获得荣誉</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 兴趣爱好 ================= -->
+<section id="interests">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>兴趣爱好</h2>
+    <p class="section-sub reveal">Interests</p>
+    <div class="cards">
+      <div class="card reveal">
+        <div class="icon" data-key="interest1_icon">💻</div>
+        <h4 data-key="interest1_title">编程</h4>
+        <p data-key="interest1_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest2_icon">📷</div>
+        <h4 data-key="interest2_title">摄影</h4>
+        <p data-key="interest2_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest3_icon">🎮</div>
+        <h4 data-key="interest3_title">游戏</h4>
+        <p data-key="interest3_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest4_icon">🎵</div>
+        <h4 data-key="interest4_title">音乐</h4>
+        <p data-key="interest4_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest5_icon">🏃</div>
+        <h4 data-key="interest5_title">运动</h4>
+        <p data-key="interest5_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest6_icon">📚</div>
+        <h4 data-key="interest6_title">阅读</h4>
+        <p data-key="interest6_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest7_icon">✈️</div>
+        <h4 data-key="interest7_title">旅行</h4>
+        <p data-key="interest7_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest8_icon">🍳</div>
+        <h4 data-key="interest8_title">美食</h4>
+        <p data-key="interest8_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+      <div class="card reveal">
+        <div class="icon" data-key="interest9_icon">🎨</div>
+        <h4 data-key="interest9_title">绘画</h4>
+        <p data-key="interest9_desc">一句话说明你对这个兴趣的热爱。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 技能特长 ================= -->
+<section id="skills">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>技能特长</h2>
+    <p class="section-sub reveal">Skills</p>
+    <div class="skills-grid">
+      <div class="skill-group reveal">
+        <h4>专业技能</h4>
+        <div class="skill">
+          <div class="top"><span data-key="skill1_name">技能名称 A</span><span class="pct" data-key="skill1_pct">90%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-bar="skill1_pct"></div></div>
+        </div>
+        <div class="skill">
+          <div class="top"><span data-key="skill2_name">技能名称 B</span><span class="pct" data-key="skill2_pct">75%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-bar="skill2_pct"></div></div>
+        </div>
+        <div class="skill">
+          <div class="top"><span data-key="skill3_name">技能名称 C</span><span class="pct" data-key="skill3_pct">60%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-bar="skill3_pct"></div></div>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h4>其他技能</h4>
+        <div class="skill">
+          <div class="top"><span data-key="skill4_name">技能名称 D</span><span class="pct" data-key="skill4_pct">80%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-bar="skill4_pct"></div></div>
+        </div>
+        <div class="skill">
+          <div class="top"><span data-key="skill5_name">技能名称 E</span><span class="pct" data-key="skill5_pct">70%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-bar="skill5_pct"></div></div>
+        </div>
+        <div class="tags">
+          <span class="tag" data-key="tag1">标签 1</span>
+          <span class="tag" data-key="tag2">标签 2</span>
+          <span class="tag" data-key="tag3">标签 3</span>
+          <span class="tag" data-key="tag4">标签 4</span>
+          <span class="tag" data-key="tag5">标签 5</span>
+          <span class="tag" data-key="tag6">标签 6</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 经历时间线 ================= -->
+<section id="timeline">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>经历时间线</h2>
+    <p class="section-sub reveal">Experience</p>
+    <div class="timeline">
+      <div class="tl-item reveal">
+        <div class="tl-time" data-key="tl1_time">2023 — 至今</div>
+        <h4 data-key="tl1_title">职位 / 角色</h4>
+        <div class="where" data-key="tl1_where">公司 / 学校名称</div>
+        <p data-key="tl1_desc">一句话描述你在这里做了什么、取得了什么成绩。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-time" data-key="tl2_time">2020 — 2023</div>
+        <h4 data-key="tl2_title">职位 / 角色</h4>
+        <div class="where" data-key="tl2_where">公司 / 学校名称</div>
+        <p data-key="tl2_desc">一句话描述你在这里做了什么、取得了什么成绩。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-time" data-key="tl3_time">2016 — 2020</div>
+        <h4 data-key="tl3_title">专业 / 学位</h4>
+        <div class="where" data-key="tl3_where">学校名称</div>
+        <p data-key="tl3_desc">一句话描述你的学习经历或重点成果。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-time" data-key="tl4_time">2013 — 2016</div>
+        <h4 data-key="tl4_title">专业 / 学位</h4>
+        <div class="where" data-key="tl4_where">学校名称</div>
+        <p data-key="tl4_desc">一句话描述你的学习经历或重点成果。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-time" data-key="tl5_time">2009 — 2013</div>
+        <h4 data-key="tl5_title">早期经历 / 学业</h4>
+        <div class="where" data-key="tl5_where">学校 / 地点</div>
+        <p data-key="tl5_desc">一句话描述你早年的学习或成长经历。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 作品集 ================= -->
+<section id="portfolio">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>作品集</h2>
+    <p class="section-sub reveal">Portfolio</p>
+    <div class="work-grid">
+      <div class="work reveal">
+        <div class="work-cover" data-key="work1_icon">🚀</div>
+        <div class="work-body">
+          <h4 data-key="work1_title">作品名称 A</h4>
+          <p data-key="work1_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work1_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work1_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work1_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work1_link">https://example.com</span>
+        </div>
+      </div>
+      <div class="work reveal">
+        <div class="work-cover" data-key="work2_icon">🎨</div>
+        <div class="work-body">
+          <h4 data-key="work2_title">作品名称 B</h4>
+          <p data-key="work2_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work2_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work2_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work2_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work2_link">https://example.com</span>
+        </div>
+      </div>
+      <div class="work reveal">
+        <div class="work-cover" data-key="work3_icon">📱</div>
+        <div class="work-body">
+          <h4 data-key="work3_title">作品名称 C</h4>
+          <p data-key="work3_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work3_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work3_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work3_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work3_link">https://example.com</span>
+        </div>
+      </div>
+      <div class="work reveal">
+        <div class="work-cover" data-key="work4_icon">🤖</div>
+        <div class="work-body">
+          <h4 data-key="work4_title">作品名称 D</h4>
+          <p data-key="work4_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work4_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work4_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work4_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work4_link">https://example.com</span>
+        </div>
+      </div>
+      <div class="work reveal">
+        <div class="work-cover" data-key="work5_icon">🌐</div>
+        <div class="work-body">
+          <h4 data-key="work5_title">作品名称 E</h4>
+          <p data-key="work5_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work5_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work5_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work5_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work5_link">https://example.com</span>
+        </div>
+      </div>
+      <div class="work reveal">
+        <div class="work-cover" data-key="work6_icon">📊</div>
+        <div class="work-body">
+          <h4 data-key="work6_title">作品名称 F</h4>
+          <p data-key="work6_desc">更详细的介绍：这个作品解决了什么问题、用了什么技术、有什么亮点或成果。</p>
+          <div class="work-tags">
+            <span class="work-tag" data-key="work6_tag1">#技术栈1</span>
+            <span class="work-tag" data-key="work6_tag2">#技术栈2</span>
+          </div>
+          <a class="work-link-btn" data-href="work6_link" href="https://example.com" target="_blank" rel="noopener">查看详情 ↗</a>
+          <span class="work-link-url" data-key="work6_link">https://example.com</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 联系方式 ================= -->
+<section id="contact">
+  <div class="container">
+    <h2 class="section-title reveal"><span class="bar"></span>联系方式</h2>
+    <p class="section-sub reveal">Contact</p>
+    <div class="contact-wrap reveal">
+      <a class="contact-mail" data-key="email" href="mailto:you@example.com">you@example.com</a>
+      <div class="socials">
+        <a class="social" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        <a class="social" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M11.34 5.82c-.36 0-.65.29-.65.65v.65h1.3v-.65c0-.36-.29-.65-.65-.65zM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM5.5 11.5h-2v-5h2v5zm-1-5.68a1.16 1.16 0 1 1 0-2.32 1.16 1.16 0 0 1 0 2.32zM12.5 11.5h-2v-2.6c0-.7-.5-1.4-1.1-1.4-.6 0-1.1.5-1.1 1.2v2.8h-2v-5h2v.6c.3-.4.9-.8 1.6-.8 1.4 0 2.6 1 2.6 2.7v2.5z"/></svg>
+          微信
+        </a>
+        <a class="social" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm3.5 4.5l-5 3 1.5-.5 2-1.5-4.5 2 2 2.5 4-5z"/></svg>
+          微博
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 <span class="mono" data-key="name">你的名字</span> · 用 ❤ 搭建 · 占位个人主页
+</footer>
+
+<!-- ================= 编辑按钮 + 工具栏 ================= -->
+<button class="edit-btn" id="editBtn" title="编辑页面">🔒</button>
+<div class="edit-bar" id="editBar">
+  <span class="edit-hint">点击任意文字直接改，改完自动保存到本浏览器</span>
+  <button id="btnSave">💾 保存</button>
+  <button id="btnExport">⬇ 导出备份</button>
+  <button id="btnImport">⬆ 导入备份</button>
+  <button id="btnReset" class="warn">↺ 恢复默认</button>
+  <button id="btnExit" class="warn">✕ 退出编辑</button>
+</div>
+
+<!-- ================= 格式工具栏 ================= -->
+<div class="format-bar" id="formatBar">
+  <button data-cmd="bold" title="加粗"><b>B</b></button>
+  <button data-cmd="italic" title="斜体"><i>I</i></button>
+  <button data-cmd="underline" title="下划线"><u>U</u></button>
+  <button data-cmd="strikeThrough" title="删除线"><s>S</s></button>
+  <span class="sep"></span>
+  <button id="fontSmaller" title="缩小整段文字">A−</button>
+  <button id="fontLarger" title="放大整段文字">A＋</button>
+  <select id="fontSizeSel" title="设置选中文字的字号">
+    <option value="">字号</option>
+    <option value="12px">12px</option>
+    <option value="14px">14px</option>
+    <option value="16px">16px</option>
+    <option value="18px">18px</option>
+    <option value="20px">20px</option>
+    <option value="24px">24px</option>
+    <option value="30px">30px</option>
+    <option value="40px">40px</option>
+    <option value="56px">56px</option>
+  </select>
+  <span class="sep"></span>
+  <label class="color-label" title="文字颜色">文字色<input type="color" id="foreColorInput" value="#e6edf7" /></label>
+  <button id="clearFormat" title="清除选中文字的格式">清除格式</button>
+</div>
+
+<script>
+  // ============================================================
+  // ★ 编辑密码：改这里的引号里的内容即可
+  // ============================================================
+  const EDIT_PASSWORD = '123456';
+  const STORE_KEY = 'site-content-v1';
+
+  // ============ 移动端导航开关 ============
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  // ============ 首屏打字机效果 ============
+  let roles = ['软件工程师', '终身学习者', '你的头衔'];
+  let roleIdx = 0, charIdx = 0, deleting = false, typeTimer = null;
+  const typeText = document.getElementById('typeText');
+
+  function typeTick() {
+    const word = roles[roleIdx] || '';
+    typeText.textContent = word.slice(0, charIdx);
+    if (!deleting) {
+      if (charIdx < word.length) { charIdx++; }
+      else { deleting = true; typeTimer = setTimeout(typeTick, 1400); return; }
+    } else {
+      if (charIdx > 0) { charIdx--; }
+      else { deleting = false; roleIdx = (roleIdx + 1) % Math.max(roles.length, 1); typeTimer = setTimeout(typeTick, 300); return; }
+    }
+    typeTimer = setTimeout(typeTick, deleting ? 40 : 90);
+  }
+  function startTyping() {
+    stopTyping();
+    charIdx = 0; deleting = false; roleIdx = 0;
+    typeText.textContent = '';
+    typeTimer = setTimeout(typeTick, 200);
+  }
+  function stopTyping() { if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; } }
+
+  // ============ 技能条：由百分比文字驱动 ============
+  function syncSkillBars() {
+    document.querySelectorAll('[data-key$="_pct"]').forEach(el => {
+      const num = parseFloat(el.textContent);
+      const bar = document.querySelector('[data-bar="' + el.dataset.key + '"]');
+      if (bar && !isNaN(num)) bar.style.width = Math.min(100, Math.max(0, num)) + '%';
+    });
+  }
+  // 邮箱文字变化时同步 mailto 链接
+  function syncEmailHref() {
+    document.querySelectorAll('a[data-key="email"]').forEach(a => {
+      a.setAttribute('href', 'mailto:' + a.innerText.trim());
+    });
+  }
+  // 作品详情链接：把链接地址文字同步到按钮 href
+  function syncLinks() {
+    document.querySelectorAll('[data-href]').forEach(a => {
+      const src = document.querySelector('[data-key="' + a.dataset.href + '"]');
+      if (src) a.setAttribute('href', src.innerText.trim());
+    });
+  }
+
+  // ============ 读取 / 保存内容（localStorage） ============
+  const roleWrap = document.getElementById('roleWrap');
+  const roleInput = document.getElementById('roleInput');
+
+  function parseRoles() {
+    if (roleInput.style.display !== 'none') {
+      const arr = roleInput.value.split(/[、,，]/).map(s => s.trim()).filter(Boolean);
+      if (arr.length) roles = arr;
+    }
+  }
+  function refreshRoleInput() { roleInput.value = roles.join('、'); }
+
+  function collect() {
+    const data = {};
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const k = el.dataset.key;
+      if (!(k in data)) data[k] = el.innerHTML;
+    });
+    data.__roles = roles;
+    return data;
+  }
+  function save() {
+    parseRoles();
+    syncSkillBars();
+    syncEmailHref();
+    syncLinks();
+    localStorage.setItem(STORE_KEY, JSON.stringify(collect()));
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const k = el.dataset.key;
+        if (data[k] !== undefined) el.innerHTML = data[k];
+      });
+      if (Array.isArray(data.__roles) && data.__roles.length) { roles = data.__roles; refreshRoleInput(); }
+      syncSkillBars();
+      syncEmailHref();
+      syncLinks();
+    } catch (e) {}
+  }
+
+  // ============ 编辑模式 ============
+  const editBtn = document.getElementById('editBtn');
+  const editBar = document.getElementById('editBar');
+  let editMode = false;
+
+  function enterEdit(skipPrompt) {
+    if (!skipPrompt) {
+      const pw = prompt('请输入编辑密码：');
+      if (pw === null) return;
+      if (pw !== EDIT_PASSWORD) { alert('密码错误'); return; }
+    }
+    editMode = true;
+    sessionStorage.setItem('edit-unlocked', '1');
+    document.body.classList.add('editing');
+    document.querySelectorAll('[data-key]').forEach(el => el.setAttribute('contenteditable', 'true'));
+    stopTyping();
+    roleWrap.style.display = 'none';
+    roleInput.style.display = 'inline-block';
+    refreshRoleInput();
+    editBtn.textContent = '🔓';
+  }
+
+  function exitEdit() {
+    parseRoles();
+    editMode = false;
+    sessionStorage.removeItem('edit-unlocked');
+    document.body.classList.remove('editing');
+    document.querySelectorAll('[data-key]').forEach(el => el.removeAttribute('contenteditable'));
+    roleWrap.style.display = 'inline';
+    roleInput.style.display = 'none';
+    editBtn.textContent = '🔒';
+    syncSkillBars();
+    syncEmailHref();
+    startTyping();
+  }
+
+  editBtn.addEventListener('click', () => { editMode ? exitEdit() : enterEdit(false); });
+
+  // 编辑任意文字后（失焦）：同步同 key 元素 + 自动保存
+  document.addEventListener('blur', e => {
+    if (!editMode || !e.target.hasAttribute || !e.target.hasAttribute('data-key')) return;
+    const k = e.target.dataset.key;
+    document.querySelectorAll('[data-key="' + k + '"]').forEach(el => { el.innerHTML = e.target.innerHTML; });
+    save();
+  }, true);
+
+  // 工具栏按钮
+  document.getElementById('btnSave').addEventListener('click', () => { save(); alert('已保存到本浏览器'); });
+  document.getElementById('btnExit').addEventListener('click', () => { save(); exitEdit(); });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if (confirm('确定恢复成最初的默认内容吗？你编辑的内容会被清空。')) {
+      localStorage.removeItem(STORE_KEY);
+      sessionStorage.removeItem('edit-unlocked');
+      location.reload();
+    }
+  });
+  document.getElementById('btnExport').addEventListener('click', () => {
+    save();
+    const blob = new Blob([JSON.stringify(collect(), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '网站内容备份.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('btnImport').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          localStorage.setItem(STORE_KEY, JSON.stringify(data));
+          load();
+          refreshRoleInput();
+          alert('导入成功');
+        } catch (err) { alert('导入失败：文件格式不正确'); }
+      };
+      reader.readAsText(f);
+    };
+    input.click();
+  });
+
+  // ============ 文字格式工具栏 ============
+  const formatBar = document.getElementById('formatBar');
+  let savedRange = null, savedEditable = null;
+
+  formatBar.addEventListener('mousedown', e => {
+    const sel = window.getSelection();
+    if (sel.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
+    const ae = document.activeElement;
+    if (ae && ae.hasAttribute && ae.hasAttribute('data-key')) savedEditable = ae;
+    if (e.target.closest('button')) e.preventDefault();
+  });
+
+  function activeEditable() {
+    const ae = document.activeElement;
+    if (ae && ae.hasAttribute && ae.hasAttribute('data-key')) return ae;
+    return savedEditable;
+  }
+  function restoreSelection() {
+    if (savedRange) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+  }
+  function applyInlineStyle(prop, value) {
+    restoreSelection();
+    const sel = window.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed) {
+      const range = sel.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style[prop] = value;
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      sel.removeAllRanges();
+    } else {
+      const el = activeEditable();
+      if (el) el.style[prop] = value;
+    }
+    save();
+  }
+  function resizeFont(delta) {
+    const el = activeEditable();
+    if (!el) return;
+    const cur = parseFloat(getComputedStyle(el).fontSize) || 16;
+    el.style.fontSize = (cur + delta) + 'px';
+    save();
+  }
+
+  formatBar.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.cmd) {
+      restoreSelection();
+      document.execCommand(btn.dataset.cmd, false, null);
+      save();
+    } else if (btn.id === 'clearFormat') {
+      restoreSelection();
+      document.execCommand('removeFormat', false, null);
+      save();
+    }
+  });
+
+  document.getElementById('fontSizeSel').addEventListener('change', e => {
+    const size = e.target.value;
+    if (size) { applyInlineStyle('fontSize', size); e.target.value = ''; }
+  });
+  document.getElementById('foreColorInput').addEventListener('input', e => {
+    applyInlineStyle('color', e.target.value);
+  });
+  document.getElementById('fontLarger').addEventListener('click', () => resizeFont(2));
+  document.getElementById('fontSmaller').addEventListener('click', () => resizeFont(-2));
+
+  // 编辑模式下点击邮箱等链接不跳转
+  document.addEventListener('click', e => {
+    if (editMode && e.target.closest && e.target.closest('a[data-key]')) e.preventDefault();
+  }, true);
+
+  // 单行元素里按回车不换行（段落 p 允许换行）
+  document.addEventListener('keydown', e => {
+    if (!editMode || e.key !== 'Enter') return;
+    const el = e.target;
+    if (el.hasAttribute && el.hasAttribute('data-key') && el.tagName !== 'P') e.preventDefault();
+  });
+
+  // ============ 滚动入场动画 ============
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ============ 初始化 ============
+  load();
+  if (sessionStorage.getItem('edit-unlocked') === '1') {
+    enterEdit(true);   // 上次保持编辑状态
+  } else {
+    startTyping();
+  }
+  setTimeout(syncSkillBars, 200);
+</script>
+</body>
+</html>
